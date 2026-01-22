@@ -36,42 +36,54 @@ let collectionName = "users";
 app.get('/get-profile', function (req, res) {
   let response = {};
   // Connect to the db using local application or docker compose variable in connection properties
-  MongoClient.connect(mongoUrlLocal, mongoClientOptions, function (err, client) {
-    if (err) throw err;
-
-    let db = client.db(databaseName);
-
-    let myquery = { userid: 1 };
-
-    db.collection(collectionName).findOne(myquery, function (err, result) {
+  MongoClient.connect(
+    mongoUrlDockerCompose,
+    mongoClientOptions,
+    function (err, client) {
       if (err) throw err;
-      response = result;
-      client.close();
 
-      // Send response
-      res.send(response ? response : {});
-    });
-  });
+      let db = client.db(databaseName);
+
+      let myquery = { userid: 1 };
+
+      db.collection(collectionName).findOne(myquery, function (err, result) {
+        if (err) throw err;
+        response = result;
+        client.close();
+
+        // Send response
+        res.send(response ? response : {});
+      });
+    }
+  );
 });
 
 app.post('/update-profile', function (req, res) {
   let userObj = req.body;
   // Connect to the db using local application or docker compose variable in connection properties
-  MongoClient.connect(mongoUrlLocal, mongoClientOptions, function (err, client) {
-    if (err) throw err;
-
-    let db = client.db(databaseName);
-    userObj['userid'] = 1;
-
-    let myquery = { userid: 1 };
-    let newvalues = { $set: userObj };
-
-    db.collection(collectionName).updateOne(myquery, newvalues, {upsert: true}, function(err, res) {
+  MongoClient.connect(
+    mongoUrlDockerCompose,
+    mongoClientOptions,
+    function (err, client) {
       if (err) throw err;
-      client.close();
-    });
 
-  });
+      let db = client.db(databaseName);
+      userObj["userid"] = 1;
+
+      let myquery = { userid: 1 };
+      let newvalues = { $set: userObj };
+
+      db.collection(collectionName).updateOne(
+        myquery,
+        newvalues,
+        { upsert: true },
+        function (err, res) {
+          if (err) throw err;
+          client.close();
+        }
+      );
+    }
+  );
   // Send response
   res.send(userObj);
 });
